@@ -43,6 +43,7 @@ public:
     // TODO make protected and have friend classes?
     void addFuture(const QString &eventId, const firebase::FutureBase &future);
 
+    void setOptions(const firebase::AppOptions& options);
 signals:
     void readyChanged();
 
@@ -58,6 +59,7 @@ private:
 
     bool _ready = false;
     firebase::App* _firebaseApp = nullptr;
+    firebase::AppOptions _appOptions;
 
     QTimer *_initTimer = nullptr;
 

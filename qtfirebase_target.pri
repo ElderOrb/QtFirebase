@@ -74,6 +74,16 @@ android: {
     DEPENDPATH += $$QTFIREBASE_SDK_LIBS_PATH
 }
 
+linux: {
+    # does anyone need 32bit still?
+    QTFIREBASE_SDK_LIBS_PATH = $$QTFIREBASE_SDK_PATH/libs/linux/x86_64
+    DEPENDPATH += $$QTFIREBASE_SDK_LIBS_PATH
+    DEFINES += _GLIBCXX_USE_CXX11_ABI=0
+
+    CONFIG += link_pkgconfig
+    PKGCONFIG += glib-2.0 libsecret-1
+}
+
 ios: {
 
     # Setup tips

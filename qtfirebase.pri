@@ -43,7 +43,7 @@ DISTFILES += \
     $$PWD/README.md
 
 # Currently supported Firebase targets
-android|ios {
+android|ios|linux {
     include(qtfirebase_target.pri)
 } else {
     include(stub/qtfirebase_stub.pri)

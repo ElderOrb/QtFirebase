@@ -103,12 +103,19 @@ void QtFirebase::addFuture(const QString &eventId, const firebase::FutureBase &f
 
 }
 
+void QtFirebase::setOptions(const firebase::AppOptions &options)
+{
+    _appOptions = options;
+}
+
 void QtFirebase::requestInit()
 {
+    #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     if(!PlatformUtils::getNativeWindow()) {
         qDebug() << self << "::requestInit" << "no native UI pointer";
         return;
     }
+    #endif
 
     if(!_ready) {
 
@@ -119,12 +126,12 @@ void QtFirebase::requestInit()
         QAndroidJniEnvironment env;
 
         // Create the Firebase app.
-        _firebaseApp = firebase::App::Create(firebase::AppOptions(), env, activity);
+        _firebaseApp = firebase::App::Create(_appOptions, env, activity);
 
         #else // Q_OS_ANDROID
 
         // Create the Firebase app.
-        _firebaseApp = firebase::App::Create(firebase::AppOptions());
+        _firebaseApp = firebase::App::Create(_appOptions);
 
         #endif
 
