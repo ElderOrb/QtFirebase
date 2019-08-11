@@ -2,6 +2,8 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <iostream>
+#include <QJSValue>
+#include <QDateTime>
 using namespace std;
 
 //For debug purposes
@@ -249,6 +251,9 @@ firebase::Variant QtFirebaseService::fromQtVariant(const QVariant &v)
         case QVariant::Double:{
             return firebase::Variant(v.toDouble());
         }
+        case QVariant::DateTime:{
+            return firebase::Variant(static_cast<int64_t>(v.toDateTime().toMSecsSinceEpoch()));
+        }
         case QVariant::String:{
             std::string str(v.toString().toUtf8().constData());
             return firebase::Variant(str);
@@ -276,7 +281,17 @@ firebase::Variant QtFirebaseService::fromQtVariant(const QVariant &v)
             return firebase::Variant(targetLst);
         }
         default:{
-            qDebug() << "QtFirebaseService::fromQtVariant type:" << v.typeName() << "not supported";
+            if(v.userType() == qMetaTypeId<QJSValue>()) {
+                QVariantMap srcMap = v.toMap();
+                std::map<std::string, firebase::Variant> targetMap;
+                for(QVariantMap::const_iterator it = srcMap.begin();it!=srcMap.end();++it)
+                {
+                    targetMap[it.key().toUtf8().constData()] = fromQtVariant(it.value());
+                }
+                return firebase::Variant(targetMap);
+            } else {
+                qDebug() << "QtFirebaseService::fromQtVariant type:" << v.typeName() << "not supported";
+            }
         }
     }
 
