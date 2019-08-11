@@ -1,7 +1,8 @@
 #include "qtfirebase.h"
-
+#include "firebase/instance_id.h"
 #include <QMutableMapIterator>
 #include <QThread>
+#include <firebase/instance_id.h>
 
 QtFirebase *QtFirebase::self = nullptr;
 
@@ -171,4 +172,109 @@ void QtFirebase::processEvents()
         _futureWatchTimer->stop();
     }
 
+}
+
+QtFirebaseGetInstanceRequest::QtFirebaseGetInstanceRequest():
+    m_complete(true)
+{
+    clearError();
+}
+
+QtFirebaseGetInstanceRequest::~QtFirebaseGetInstanceRequest()
+{
+}
+
+void QtFirebaseGetInstanceRequest::exec()
+{
+    if(!running())
+    {
+        connect(QtFirebase::instance(), &QtFirebase::futureEvent, this, &QtFirebaseGetInstanceRequest::onFutureEvent, Qt::UniqueConnection);
+
+        setComplete(false);
+
+        firebase::InitResult initResult;
+        auto instanceId = firebase::instance_id::InstanceId::GetInstanceId(QtFirebase::instance()->firebaseApp(), &initResult);
+        auto getInstanceId = instanceId->GetId();
+
+        QtFirebase::instance()->addFuture("getInstance", getInstanceId);
+    }
+}
+
+int QtFirebaseGetInstanceRequest::errorId() const
+{
+    return m_errId;
+}
+
+bool QtFirebaseGetInstanceRequest::hasError() const
+{
+    return m_errId != firebase::instance_id::kErrorNone;
+}
+
+QString QtFirebaseGetInstanceRequest::errorMsg() const
+{
+    return m_errMsg;
+}
+
+void QtFirebaseGetInstanceRequest::onFutureEvent(QString eventId, firebase::FutureBase future)
+{
+    disconnect(QtFirebase::instance(), &QtFirebase::futureEvent, this, &QtFirebaseGetInstanceRequest::onFutureEvent);
+
+    if(future.status() != firebase::kFutureStatusComplete)
+    {
+        qDebug() << this << "::onFutureEvent " << "ERROR: Action failed with status: " << future.status();
+        setError(0);
+    }
+    else if (future.error() != firebase::instance_id::kErrorNone)
+    {
+        qDebug() << this << "::onFutureEvent Error occured in result:" << future.error() << future.error_message();
+        setError(future.error(), future.error_message());
+    }
+
+    auto& getInstanceIdFuture = static_cast<firebase::Future<std::string>&>(future);
+    if(getInstanceIdFuture.result()) {
+        m_instanceId = QString::fromStdString(*getInstanceIdFuture.result());
+    } else {
+        m_instanceId.clear();
+    }
+
+    setComplete(true);
+}
+
+void QtFirebaseGetInstanceRequest::setComplete(bool value)
+{
+    if(m_complete!=value)
+    {
+        m_complete = value;
+        emit runningChanged();
+        if(m_complete)
+        {
+            emit completed(m_errId == firebase::instance_id::kErrorNone);
+        }
+    }
+}
+
+void QtFirebaseGetInstanceRequest::setError(int errId, const QString &msg)
+{
+    m_errId = errId;
+    m_errMsg = msg;
+}
+
+void QtFirebaseGetInstanceRequest::clearError()
+{
+    setError(firebase::instance_id::kErrorNone);
+}
+
+QString QtFirebaseGetInstanceRequest::instanceId() const
+{
+    return m_instanceId;
+}
+
+bool QtFirebaseGetInstanceRequest::running() const
+{
+    return !m_complete;
+}
+
+void QtFirebaseGetInstanceRequest::onRun()
+{
+    exec();
 }

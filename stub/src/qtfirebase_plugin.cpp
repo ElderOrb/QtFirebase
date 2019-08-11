@@ -53,6 +53,7 @@ static QObject *QtFirebaseStorageProvider(QQmlEngine *engine, QJSEngine *scriptE
 void QtFirebasePlugin::registerTypes(const char *uri)
 {
     // @uri QtFirebase
+    qmlRegisterType<QtFirebaseGetInstanceRequest>(uri, 1, 0, "GetInstanceRequest");
 
 #if defined(QTFIREBASE_BUILD_ALL) || defined(QTFIREBASE_BUILD_ANALYTICS)
     qmlRegisterType<QtFirebaseAnalytics>(uri, 1, 0, "Analytics");

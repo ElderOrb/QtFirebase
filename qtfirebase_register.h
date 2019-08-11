@@ -95,6 +95,8 @@ static QObject *QtFirebaseStorageProvider(QQmlEngine *engine, QJSEngine *scriptE
 
 static void registerQtFirebase() {
 
+    qmlRegisterType<QtFirebaseGetInstanceRequest>("QtFirebase", 1, 0, "GetInstanceRequest");
+
 #if defined(QTFIREBASE_BUILD_ALL) || defined(QTFIREBASE_BUILD_ANALYTICS)
     qmlRegisterType<QtFirebaseAnalytics>("QtFirebase", 1, 0, "Analytics");
 #endif
