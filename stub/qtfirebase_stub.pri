@@ -47,4 +47,9 @@ contains(DEFINES,QTFIREBASE_BUILD_AUTH) {
     HEADERS += $$QTFIREBASE_STUB_PATH/src/qtfirebasedatabase.h
 }
 
+# Storage
+contains(DEFINES,QTFIREBASE_BUILD_STORAGE) {
+    HEADERS += $$QTFIREBASE_STUB_PATH/src/qtfirebasestorage.h
+}
+
 SOURCES += $$QTFIREBASE_STUB_PATH/src/qtfirebase.cpp

@@ -270,4 +270,24 @@ contains(DEFINES,QTFIREBASE_BUILD_DATABASE) {
     LIBS += -L$$QTFIREBASE_SDK_LIBS_PATH -l$${QTFIREBASE_SDK_LIBS_PREFIX}database
 }
 
+# Storage
+contains(DEFINES,QTFIREBASE_BUILD_STORAGE) {
+    message( "QtFirebase including Storage" )
+
+    ios: {
+        LIBS += \
+            -licucore \
+            -F$$QTFIREBASE_FRAMEWORKS_ROOT/Storage \
+            -framework FirebaseStorage \
+            -framework leveldb-library \
+        \
+    }
+
+    HEADERS += $$PWD/src/qtfirebasestorage.h
+    SOURCES += $$PWD/src/qtfirebasestorage.cpp
+
+    PRE_TARGETDEPS += $$QTFIREBASE_SDK_LIBS_PATH/lib$${QTFIREBASE_SDK_LIBS_PREFIX}storage.a
+    LIBS += -L$$QTFIREBASE_SDK_LIBS_PATH -l$${QTFIREBASE_SDK_LIBS_PREFIX}storage
+}
+
 LIBS += -L$$QTFIREBASE_SDK_LIBS_PATH -l$${QTFIREBASE_SDK_LIBS_PREFIX}app
